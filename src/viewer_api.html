@@ -1,0 +1,307 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+    <head>
+        <title>GlobeSpotter API</title>
+        <meta name="google" value="notranslate">
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <style type="text/css" media="screen">
+            html, body {
+                height:100%;
+            }
+            body {
+                margin:0;
+                padding:0;
+                overflow:auto;
+                text-align:center;
+                background-color: #888888;
+            }
+            object:focus {
+                outline:none;
+            }
+            #flashContent {
+                display:none;
+                text-align:center;
+            }
+        </style>
+        <link href="japi/api-demo.css" rel="stylesheet" type="text/css" />
+        <script>
+
+    var dojoConfig = {
+        async: true,
+        packages: [{
+            "name": "myModules",
+            "location": "http://ddotgisapp02/signworks/src/js/mymodules/"
+        }]
+    };
+
+        </script>
+        <script type="text/javascript" src="//code.jquery.com/jquery-latest.js"></script>
+        <script type="text/javascript" src="japi/api-common.js"></script>
+        <script type="text/javascript" src="js/swfobject.js"></script>
+        <script src="http://js.arcgis.com/3.15/"></script>
+        <script type="text/javascript">
+            // For version detection, set to min. required Flash Player version, or 0 (or 0.0.0), for no version detection.
+            var swfVersionStr = "11.1.0";
+
+            // To use express install, set to playerProductInstall.swf, otherwise the empty string.
+            var xiSwfUrlStr = "playerProductInstall.swf";
+
+            var flashvars = {
+                globeSpotterConfigurationFilePath: "./config/application/GlobeSpotterConfiguration_Azure_NL.xml",
+                globeSpotterConfigurationId: "ortho_nl"
+            };
+
+            var params = {
+                quality: "high",
+                bgcolor: "#888888",
+                allowscriptaccess: "always",
+                allowfullscreen: "true",
+                wmode: "direct"
+            };
+
+            var attributes = {
+                id: "japi",
+                name: "viewer_api",
+                align: "middle"
+            }
+
+            // Parse key value pairs from the query portion of an URL and append them to the flashvars object.
+            // The search property returns the query portion of an URL, including the question mark (?).
+            var q = window.location.search;
+            // The hash property returns the anchor portion of a URL, including the hash sign (#).
+            // The hash portion can contain the search string due to various integrations based on an older version
+            // of GlobeSpotter that contained the hash due to flash browser history.
+            var h = window.location.hash;
+            var s = (q) ? q : (h) ? h : "";
+
+            swfobject.embedSWF(
+                "https://globespotter.cyclomedia.com/v31/api/viewer_api.swf" + s.toLowerCase(), "flashContent",
+                "100%", "100%",
+                swfVersionStr, xiSwfUrlStr,
+                flashvars, params, attributes
+            );
+
+            // JavaScript enabled so display the flashContent div in case it is not replaced with a swf object.
+            $("#flashContent").css("display", "block");
+        </script>
+    </head>
+    <body>
+        <script type="text/javascript">
+   
+            var testy, x, y, esriPointG, pt, pt2, esriPointWM, bearing, nearestImageID;
+            esriPointG = { x: null, y: null };
+            var query = window.location.search.substring(1);
+            var parms = query.split('&');
+            var pos = parms[0].indexOf('=');
+            esriPointG.y = parms[0].substring(pos + 1);
+            esriPointG.x = parms[1].substring(pos + 1);
+            require(["myModules/LinearReferencingUtilities", "myModules/MapUtilities", "esri/geometry/Point", "esri/SpatialReference"], function (LinearRef, MapUtilities, Point, SpatialReference) {
+                var query = window.location.search.substring(1);
+              
+                var parms = query.split('&');
+                var pos = parms[0].indexOf('=');
+                y = parms[0].substring(pos + 1);
+                x = parms[1].substring(pos + 1);
+               
+                esriPointG = new Point(x,y,new SpatialReference({wkid:4326}));
+                esriPointWM = MapUtilities.geographicToWebMercator(esriPointG);
+                var callback = function (pts) {
+                    var x = pts[0].geometry;
+                    pt2 = new Point(x, y, new SpatialReference({ wkid: 4326 }));
+               //     var dir = MapUtilities.calculateBearingPoints(pt, pt2);
+                    var dor = MapUtilities.calculateBearingPoints(pt2, pt);
+                    var viewerParams = new ViewerParameters(dor, 10.0, 100.0);
+                    api.openImage(nearestImageID, viewerParams);
+                };
+                bearing = function (x, y) {
+                    pt = new Point(x, y, new SpatialReference({ wkid: 4326 }));
+                    LinearRef.getPointOnRouteGeographic(pt, callback);
+                };
+
+
+            });
+    
+            //function addToLog(s) {
+            //    var log = document.getElementById("testLog");
+            //    log.value = s + "\n" + log.value;
+            //}
+
+
+            // **************************************************************************************************
+            // Simple API initialization and some simple examples of how to open images and how to manage
+            // different viewers.
+            // **************************************************************************************************
+
+            // general API access
+            var api;
+
+            function apiReady() {
+                var ready = api && api.getAPIReadyState();
+
+                if (!ready) {
+                    alert("API not ready.");
+                }
+
+                return ready;
+            }
+
+    
+
+  
+
+            function openNearestImage() {
+                if (apiReady()) {
+                  
+                    try {
+                        //  var cliker = api.getViewerClickMode();
+                        api.setViewerClickMode(3);
+                        api.openNearestImage(esriPointG.x + "," + esriPointG.y, 1);
+                     //   api.openNearestImage("55 M street", 1);
+                    }
+                    catch (error) {
+                        alert("Error while opening an image: " + error);
+                    }
+
+                }
+            }
+
+            function openImage() {
+                if (apiReady()) {
+                   
+                    var query = document.getElementById("openImageValue").value;
+
+                    if (!query || query == "") {
+                        alert("Invalid input.");
+                    }
+                    else {
+                        var viewerParams = new ViewerParameters(30, 10.0, 100.0);
+
+                        try {
+                            
+                            api.setCloseViewerEnabled(true);
+                            api.setActiveViewerReplaceMode(false);
+                            api.setViewerBrightnessEnabled(true);
+                            api.openImage(query, viewerParams);
+                        }
+                        catch(error) {
+                            alert("Error while opening an image: " + error);
+                        }
+                    }
+                }
+            }
+
+
+           
+
+            /**
+            * Indicates to the host that the component is ready for use. After this event the user is able to
+            * set various required application parameters to be able to use the components API functionality.
+            */
+            function hst_componentReady() {
+                var api = document.getElementById("japi");
+
+                try {
+                    // Set an API key.
+                    api.setAPIKey("CnkxOTY52fExizg9C_EVanMh2j0RK3gxuzURif89eLsZu3ghqTAt6LEdKng56fo1");
+                    api.setUserNamePassword("signworks", "SIGNWORKS");
+                    //api.setUserNamePassword("username", "password");
+
+                    //api.setUserNamePassword("obliekNLcampagne", "t68rd4c4");
+                    //api.setServiceURL("https://proxy.cyclomedia.com/obliquewfs/Oblique_2015/wfs", 0x107);
+
+                    api.setSRSNameViewer("EPSG:4326");
+                    api.setSRSNameAddress("EPSG:4326");
+             //       api.setSRSNameViewer("EPSG:102100");
+             //       api.setSRSNameAddress("EPSG:102100");
+              //      api.setAddressLanguageCode(ADDRESS_LANGUAGE_CODE);
+                }
+                catch(error) {
+                    // Its a string ...
+                    alert(error);
+                }
+
+                //addToLog("hst_componentReady()");
+            }
+
+       
+
+            /**
+            * Indicates to the host that the API is ready for use. Full API functionality should be available
+            * based on the user's credentials.
+            */
+            function hst_apiReady() {
+                api = document.getElementById("japi"); // won't work: $("#japi");
+
+  
+                openNearestImage();
+            }
+
+
+            /**
+             * Indicates to the host that the API was unable to open an image due to the maximimum amount of viewers already being reached
+             */
+            function hst_maxViewers() {
+                addToLog("hst_maxViewers()");
+            }
+
+
+            /**
+             * Indicates to the host the result of an open image call (see CALL_OPEN_IMAGE)
+             *
+             * @param request       The originating request [String] (input value of CALL_OPEN_IMAGE)
+             * @param opened        Indicates of the request could be opened in a viewer window [Boolean].
+             * @param imageID       The imageID that was to be opened [String].
+             */
+            function hst_openImageResult(request, opened, imageID) {
+                if (!opened) {
+                    api.openNearestImage(request, 1);
+                }
+
+                addToLog("hst_openImageResult(): " + request + "," + opened + "," + imageID);
+            }
+
+            /**
+             * Indicates to the host the result of an open image call (see CALL_OPEN_NEAREST_IMAGE)
+             *
+             * @param request       The originating request [String] (input value of CALL_OPEN_IMAGE)
+             * @param opened        Indicates of the request could be opened in a viewer window [Boolean].
+             * @param imageID       (Optional) The imageID that was to be opened (if available) [String].
+             * @param position      (Optional) The position on which the nearest result is based (if
+             * available). An object having <i>x</i> and <i>y<i/> and <i>z<i/> as properties [Object].
+             */
+            function hst_openNearestImageResult(request, opened, imageID, position) {
+   //             addToLog("hst_openNearestImageResult(): " + request + "," + opened + ((imageID != null) ? ("," + imageID) : "") + ((position != null) ? ",(" + position.x + " " + position.y + " " + position.z + ")" : ""));
+                nearestImageID = imageID;
+  //              bearing(position.x, position.y);
+            }
+
+            function hst_viewClicked(viewerID, x, y, z) {
+
+                debugger;
+                var bob = x + y;
+            }
+
+          
+        </script>
+
+       
+
+        <div id="flashDiv" style="height:100%;">
+            <!-- The contents of this div will be replaced with the GlobeSpotter flash object
+                 provided Flash Player 10.0 or higher is installed and JavaScript is enabled. -->
+            <div id="flashContent">
+                <p>
+                    To view this page ensure that Adobe Flash Player version 10.0.0 or greater is installed
+                    and JavaScript is enabled.
+                </p>
+                <script type="text/javascript">
+                    document.write(
+                        "<a href='http://www.adobe.com/go/getflashplayer'><img src='"
+                        + (document.location.protocol == "https:" ? "https:" : "http:") +
+                        "//www.adobe.com/images/shared/download_buttons/get_flash_player.gif' alt='Get Adobe Flash player' /></a>"
+                    );
+                </script>
+            </div>
+        </div>
+    </body>
+</html>

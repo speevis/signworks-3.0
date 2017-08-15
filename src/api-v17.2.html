@@ -1,0 +1,727 @@
+﻿<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Street Smart API Example Integration</title>
+    <!-- here would be a script for your styling, but we have bootstrap included in our API, so we will use that -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/flatly/bootstrap.css">
+
+    <!--suppress JSUnresolvedLibraryURL -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react.min.js"></script>
+    <!--suppress JSUnresolvedLibraryURL -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.min.js"></script>
+    <!--suppress JSUnresolvedLibraryURL -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.0.1/ol.js"></script>
+    <!--suppress JSUnresolvedLibraryURL -->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+
+
+    <script type="text/javascript" src="https://streetsmart.cyclomedia.com/api/v17.2/StreetSmartApi.js"></script>
+
+
+    <style>
+        body {
+            margin: 10px;
+        }
+
+        #streetsmartApiInterface *[disabled] {
+            opacity: 0.5;
+        }
+
+        @media (min-width: 1400px) {
+            #streetsmartApiInterface.container {
+                width: 1370px;
+            }
+        }
+
+        @media (min-width: 1600px) {
+            #streetsmartApiInterface.container {
+                width: 1570px;
+            }
+        }
+
+        @media (min-width: 1920px) {
+            #streetsmartApiInterface.container {
+                width: 1890px;
+            }
+        }
+
+        #streetsmartApiInterface vspace {
+            display: block;
+            height: 8px;
+        }
+
+        #streetsmartApiInterface .orientation input {
+            width: 30px;
+        }
+
+        #streetsmartApiInterface #rotationTable button {
+            width: 30px;
+        }
+
+        #streetsmartApiInterface .field-row {
+            width: 100%;
+        }
+        #streetsmartApiInterface .field-row > * {
+            display: inline-block;
+            float: none;
+        }
+
+        #streetsmartApiInterface label {
+            width: 75px;
+            text-align: left;
+        }
+
+        #streetsmartApiInterface.container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #streetsmartApiInterface .container-row {
+            display: flex;
+            flex-direction: row;
+        }
+
+        #streetsmartApiInterface .container-item {
+            display: flex;
+            flex-direction: row;
+            flex-grow: 1;
+            padding: 3px;
+        }
+
+        #streetsmartApiInterface .space-between {
+            justify-content: space-between;
+        }
+
+        #streetsmartApiInterface .flex-direction-column {
+            flex-direction: column;
+        }
+
+        #streetsmartApiInterface .container-item fieldset {
+            width: 100%;
+        }
+
+        #streetsmartApi {
+            display: flex;
+            width: 100%;
+            height: 500px;
+            background: #333;
+        }
+    </style>
+</head>
+<body>
+<div id="streetsmartApiInterface" class="container">
+    <div class="container-row">
+        <h4>ApplicationName: <small id="streetsmartName">StreetSmartPlaceHolder</small> </h4>
+        <h4>ApplicationVersion: <small id="streetsmartVersion">StreetSmartVersionPlaceholder</small> </h4>
+        <h4>API Ready: <small id="streetsmartApiReady">StreetSmartReadyPlaceholder</small> </h4>
+    </div>
+    <div class="container-row">
+        <div class="container-item space-between flex-direction-column">
+            <fieldset id="initFieldset">
+                <legend>Setup</legend>
+                <div class="field-row">
+                    <label for="username">Username: </label>
+                    <input id="username" value="signworks"/>
+                </div>
+                <div class="field-row">
+                    <label for="password">Password: </label>
+                    <input id="password" type="password" value="signworks" onkeyup="onEnter(event)" />
+                </div>
+                <div class="field-row">
+                    <label for="srs">SRS: </label>
+                    <input id="srs" value="EPSG:2248" placeholder="e.g: EPSG:2248">
+                </div>
+                <div class="field-row">
+                    <label for="APIKey">APIKey: </label>
+                    <input id="APIKey" value="cnkxoty52fexizg9c_evanmh2j0rk3gxuzurif89elszu3ghqtat6ledkng56fo1">
+                </div>
+                <button id="initApiButton" onclick="initApi()">Init API</button>
+            </fieldset>
+            <fieldset>
+                <legend>Destroy</legend>
+                <button id="destroyApiButton" onclick="destroyApi()" disabled>Destroy API</button>
+            </fieldset>
+        </div>
+        <div class="container-item">
+            <fieldset disabled>
+                <legend>Location</legend>
+                <div class="field-row">
+                    <label>Viewer(s): </label>
+                    <select id="viewers">
+                        <option value="panorama">Panorama</option>
+                        <option value="oblique">Oblique</option>
+                        <option value="both">Both</option>
+                    </select>
+                </div>
+                <vspace></vspace>
+                <div class="field-row">
+                    <label for="address">Query: </label>
+                    <input id="address" value="Park Street NW 1112, Washington DC"/>
+                    <button onclick="openByQuery()" title="open by address">Go</button>
+                </div>
+                <vspace></vspace>
+                <p>
+                    Coordinate: 327542.21, 4306644.52<br/>
+                    Panorama ID: 5D4PXDKF<br/>
+                    Address: Park Street NW 1112, Washington DC<br/>
+                    Extent: ...
+                </p>
+                <vspace></vspace>
+                <div class="field-row">
+                    <label for="closable">Allow close?</label>
+                    <input id="closable" type="checkbox" checked />
+                </div>
+                <div class="field-row">
+                    <label for="maximizable">Allow maximize?</label>
+                    <input id="maximizable" type="checkbox" checked />
+                </div>
+            </fieldset>
+        </div>
+        <div class="container-item orientation">
+            <fieldset disabled>
+                <legend>Orientation<br/>Panorama</legend>
+                <div class="field-row">
+                    <label for="yaw">Yaw:</label>
+                    <input id="yaw" value="0"/>
+                </div>
+                <div class="field-row">
+                    <label for="pitch">Pitch:</label>
+                    <input id="pitch" value="0"/>
+                </div>
+                <div class="field-row">
+                    <label for="hFov">HFov:</label>
+                    <input id="hFov" value="110"/>
+                </div>
+                <button onclick="setOrientation()" title="set orientation">Set</button>
+            </fieldset>
+        </div>
+        <div class="container-item">
+            <fieldset disabled>
+                <legend>&nbsp;</legend>
+                <table id="rotationTable">
+                    <tr>
+                        <td></td>
+                        <td><button onclick="rotateUp()">^</button></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td><button onclick="rotateLeft()">&lt;</button></td>
+                        <td><button onclick="resetOrientation()">R</button></td>
+                        <td><button onclick="rotateRight()">&gt;</button></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td><button onclick="rotateDown()">v</button></td>
+                        <td></td>
+                    </tr>
+                </table>
+
+                <vspace></vspace>
+
+                <div>
+                    <button onclick="zoomIn()">+</button>
+                    <button onclick="zoomOut()">-</button>
+                </div>
+            </fieldset>
+        </div>
+        <div class="container-item">
+            <fieldset disabled>
+                <legend>Toggle UI Panorama</legend>
+                <div class="field-row">
+                    <label>TimeTravel: </label>
+                    <button onclick="toggleTimeTravelVisible()" title="toggle TimeTravel visibility">vis</button>
+                    <button onclick="toggleTimeTravelExpanded()" title="toggle TimeTravel expanded">exp</button>
+                </div>
+                <div class="field-row">
+                    <label>NavBar: </label>
+                    <button onclick="toggleNavBarVisible()" title="toggle nav bar visibility">vis</button>
+                    <button onclick="toggleNavBarExpanded()" title="toggle nav bar expanded">exp</button>
+                </div>
+                <div class="field-row">
+                    <label>Recordings: </label>
+                    <button onclick="toggleRecordingsVisible()" title="toggle recording visibility">vis</button>
+                </div>
+                <vspace></vspace>
+                <div class="field-row">
+                    <label>Buttons panorama/oblique: </label><br/>
+                    <select id="buttons">
+                        <option>---</option>
+                    </select>
+                    <button onclick="toggleButtonEnabled()" title="toggle recording visibility">vis</button>
+                </div>
+                <div class="field-row">
+                    <label>Measure:</label>
+                    <select id="measurementGeom">
+                        <option></option>
+                    </select>
+                    <button onclick="startMeasMode()" title="start measurement mode">start</button>
+                    <button onclick="stopMeasMode()" title="stop measurement mode">stop</button>
+                </div>
+                <div>
+                    <button onclick="getMeasurementInfo()" title="get measurement info">get measurement info</button>
+                </div>
+            </fieldset>
+        </div>
+        <div class="container-item">
+            <fieldset disabled>
+                <legend>Toggle UI Oblique</legend>
+                <div class="field-row">
+                    <label>TimeTravel: </label>
+                    <button onclick="toggleTimeTravelVisible(true)" title="toggle TimeTravel visibility">vis</button>
+                    <button onclick="toggleTimeTravelExpanded(true)" title="toggle TimeTravel expanded">exp</button>
+                </div>
+                <div class="field-row">
+                    <label>NavBar: </label>
+                    <button onclick="toggleNavBarVisible(true)" title="toggle nav bar visibility">vis</button>
+                    <button onclick="toggleNavBarExpanded(true)" title="toggle nav bar expanded">exp</button>
+                </div>
+                <div class="field-row">
+                    <label>Load GeoJSON overlay: </label>
+                    <textarea id="geojson" type="text" rows="10">
+                    	{
+"type": "FeatureCollection",
+"features": [
+{ "type": "Feature", "properties": {  }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 327319.97617941996, 4306777.5363531373, 2.917003981715808 ], [ 327319.96489507792, 4306777.5887146024, 1.600393850049787 ], [ 327320.68403402064, 4306777.6064499477, 1.600652328675654 ], [ 327320.66484416346, 4306777.5527596287, 2.931695930458854 ], [ 327319.97617941996, 4306777.5363531373, 2.917003981715808 ] ] ] } },
+{ "type": "Feature", "properties": {  }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 327322.12176700204, 4306777.3760607075, 2.871542098441221 ], [ 327322.0947843329, 4306777.408802731, 1.557440592753156 ], [ 327322.85679698223, 4306777.4813820748, 1.582721229489955 ], [ 327322.84271819814, 4306777.4439900685, 2.922948348267829 ], [ 327322.12176700204, 4306777.3760607075, 2.871542098441221 ] ] ] } }
+]
+}
+
+									</textarea>
+                    <button onclick="addOverlay()" title="load GeoJSON overlay">add</button>
+                </div>
+            </fieldset>
+        </div>
+        <div class="container-item">
+            <fieldset disabled>
+                <legend>Log</legend>
+                <div class="field-row">
+                    <textarea title="log messages" id="log" rows="4"></textarea>
+                </div>
+                <div class="field-row">
+                    <button onclick="consoleLogCurrentRecording()">Log opened recording into console</button>
+                </div>
+                <div class="field-row">
+                    <button onclick="consoleLogFunctionalities()">Log functionalities into console.</button>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>
+<div id="streetsmartApi">
+</div>
+
+<script type="text/javascript">
+    var ROTATE_DEGREES = 15;
+    var DEFAULT_YAW = 0;
+    var DEFAULT_PITCH = 0;
+    var DEFAULT_HFOV = 110;
+
+    var $ = document.querySelector.bind(document);
+
+    function onEnter(event) {
+        if (event.keyCode === 13) {
+            initApi();
+        }
+    }
+
+    window.onload = function() {
+        $('#streetsmartName').innerText = StreetSmartApi.getApplicationName();
+        $('#streetsmartVersion').innerText = StreetSmartApi.getApplicationVersion();
+        getButtons();
+        getMeasurementGeometryType();
+        setReadyState();
+    };
+
+    function setMeasurementEvents() {
+        var msEvents = StreetSmartApi.Events.measurement;
+        StreetSmartApi.on(msEvents.MEASUREMENT_CHANGED, handleMeasurementInfo);
+    }
+
+    function getMeasurementGeometryType() {
+        var measureGeom = $('#measurementGeom');
+        var option = measureGeom.firstElementChild;
+
+        while (option.nextSibling) {
+            measureGeom.removeChild(option.nextSibling);
+        }
+
+        var addOption = function(value, label) {
+            var option = document.createElement('option');
+            option.value = value;
+            option.innerText = label;
+            measureGeom.appendChild(option);
+            return option;
+        };
+
+        option.style.fontWeight = 'bold';
+        _.forEach(StreetSmartApi.MeasurementGeometryType, addOption);
+        option.setAttribute('data-enabled', 'false');
+    }
+
+    function startMeasMode() {
+        var measureGeom = $('#measurementGeom');
+        const panoramaViewer = StreetSmartApi.startMeasurementMode(window.panoramaViewer, { geometry: measureGeom.value });
+
+        if (panoramaViewer !== window.panoramaViewer) {
+            disconnectEvents();
+            window.panoramaViewer = panoramaViewer;
+            connectEvents();
+        }
+    }
+
+    function getMeasurementInfo() {
+        var measurementInfo = StreetSmartApi.getActiveMeasurement();
+        logMeasurementInfo(measurementInfo);
+    }
+
+    function stopMeasMode() {
+        StreetSmartApi.stopMeasurementMode();
+    }
+
+    function setReadyState() {
+        $('#streetsmartApiReady').innerText = StreetSmartApi.getApiReadyState();
+    }
+
+    function logToTextArea(eventToLog) {
+        var textarea = $('#log');
+        textarea.value += eventToLog.type+'\n';
+        textarea.scrollTop = textarea.scrollHeight;
+    }
+
+    function handleMeasurementInfo(measurementEvent) {
+        if (measurementEvent && measurementEvent.detail) {
+     //       const { activeMeasurement, panoramaViewer } = measurementEvent.detail;
+     //       logMeasurementInfo(activeMeasurement);
+
+            if (panoramaViewer && (window.panoramaViewer !== panoramaViewer)) {
+                disconnectEvents();
+                window.panoramaViewer = panoramaViewer;
+                connectEvents();
+            }
+        }
+    }
+
+    function logMeasurementInfo(activeMeasurement) {
+        if (activeMeasurement) {
+            var textarea = $('#log');
+            textarea.value += JSON.stringify(activeMeasurement) + '\n';
+            textarea.scrollTop = textarea.scrollHeight;
+        }
+    }
+
+    function openByQuery() {
+        var query = $('#address').value;
+        var viewerTypeValue = $('#viewers').value;
+        var srs = $('#srs').value;
+        var closable = $('#closable').checked;
+        var maximizable = $('#maximizable').checked;
+
+        var viewerType = [];
+        if (viewerTypeValue === 'both') {
+            viewerType.push(StreetSmartApi.ViewerType.PANORAMA, StreetSmartApi.ViewerType.OBLIQUE);
+        } else if (viewerTypeValue === 'panorama' ) {
+            viewerType.push(StreetSmartApi.ViewerType.PANORAMA);
+        } else if (viewerTypeValue === 'oblique' ) {
+            viewerType.push(StreetSmartApi.ViewerType.OBLIQUE);
+        }
+
+        StreetSmartApi.open(query, {
+            viewerType: viewerType,
+            srs: srs,
+            closable: closable,
+            maximizable: maximizable
+        }).then(
+            function(result) {
+                console.log('Created component through API:', result);
+                if (result) {
+                    disconnectEvents();
+
+                    for (let i =0; i < result.length; i++) {
+                        if(result[i].getType() === StreetSmartApi.ViewerType.PANORAMA) window.panoramaViewer = result[i];
+                        if(result[i].getType() === StreetSmartApi.ViewerType.OBLIQUE) window.obliqueViewer = result[i];
+                    }
+
+                    connectEvents();
+                }
+            }
+        ).catch(
+            function(reason) {
+                console.log('Failed to create component(s) through API: ' + reason);
+            }
+        )
+    }
+
+    function disconnectEvents() {
+        if (window.panoramaViewer) {
+            var pv = window.panoramaViewer;
+            var pvEvents = StreetSmartApi.Events.panoramaViewer;
+
+            pv.off(pvEvents.RECORDING_CLICK, logToTextArea);
+            pv.off(pvEvents.IMAGE_CHANGE, logToTextArea);
+            pv.off(pvEvents.VIEW_CHANGE, logToTextArea);
+            pv.off(pvEvents.VIEW_LOAD_START, logToTextArea);
+            pv.off(pvEvents.VIEW_LOAD_END, logToTextArea);
+            pv.off(pvEvents.TILE_LOAD_ERROR, logToTextArea);
+        }
+    }
+
+    function connectEvents() {
+        if (window.panoramaViewer) {
+            var pv = window.panoramaViewer;
+            var pvEvents = StreetSmartApi.Events.panoramaViewer;
+
+            pv.on(pvEvents.RECORDING_CLICK, logToTextArea);
+            pv.on(pvEvents.IMAGE_CHANGE, logToTextArea);
+            pv.on(pvEvents.VIEW_CHANGE, logToTextArea);
+            pv.on(pvEvents.VIEW_LOAD_START, logToTextArea);
+            pv.on(pvEvents.VIEW_LOAD_END, logToTextArea);
+            pv.on(pvEvents.TILE_LOAD_ERROR, logToTextArea);
+        }
+    }
+
+    function handleAddressErrorMessage(err) {
+        if (err.message === 'EXTENT_LOADED') {
+            alert('Your search resulted in an area instead of a point location, please try a more specific address');
+        } else {
+            handlePromiseErrorMessage(err);
+        }
+    }
+
+    function handlePromiseErrorMessage(err) {
+        console.log(err.message);
+    }
+
+    function toggleRecordingsVisible() {
+        window.panoramaViewer.toggleRecordingsVisible();
+    }
+
+    function getButtons() {
+        var buttonSelect = $('#buttons');
+        var option = buttonSelect.firstElementChild;
+
+        // Remove all but first child
+        while (option.nextSibling) {
+            buttonSelect.removeChild(option.nextSibling);
+        }
+
+        var addOption = function(value, label) {
+            var option = document.createElement('option');
+            option.value = value;
+            option.innerText = label;
+            buttonSelect.appendChild(option);
+            return option;
+        };
+
+        option = addOption(null, 'PanoramaViewer');
+        option.style.fontWeight = 'bold';
+
+        _.forEach(StreetSmartApi.PanoramaViewerUi.buttons, addOption);
+
+        // Special value '*' requires an explicit value, we'll store it in a data attribute.
+//        option = addOption('*', '*'); // TODO DOES NOT WORK CURRENTLY  check usage of '*'
+//        option.setAttribute('data-enabled', 'false');
+
+        option = addOption(null, 'ObliqueViewer');
+        option.style.fontWeight = 'bold';
+
+        _.forEach(StreetSmartApi.ObliqueViewerUi.buttons, addOption);
+    }
+
+    function toggleButtonEnabled() {
+        // TODO
+        var viewer;
+        var select = $('#buttons');
+        var buttonId = select.value;
+        if (buttonId.indexOf('panorama.') === 0) {
+            viewer = window.panoramaViewer;
+        } else if (buttonId.indexOf('oblique.') === 0) {
+            viewer = window.obliqueViewer;
+        }
+        if (buttonId && viewer) {
+            if (buttonId === '*') {
+                // Requires 'enabled' argument
+                var option = select.selectedOptions[0];
+                var enabled = option.getAttribute('data-enabled') === 'true';
+                option.setAttribute('data-enabled', (!enabled).toString());
+                viewer.toggleButtonEnabled('*', enabled);
+            } else {
+                viewer.toggleButtonEnabled(buttonId);
+            }
+        }
+        console.log('bva', buttonId);
+        console.log(viewer.getButtonEnabled(buttonId));
+    }
+
+    function toggleNavBarVisible(oblique) {
+        if (!oblique) {
+            window.panoramaViewer.toggleNavbarVisible();
+        } else {
+            window.obliqueViewer.toggleNavbarVisible();
+        }
+    }
+
+    function toggleNavBarExpanded(oblique) {
+        // set default
+        if (oblique === undefined) oblique = false;
+
+        if (!oblique) {
+            window.panoramaViewer.toggleNavbarExpanded();
+        } else {
+            window.obliqueViewer.toggleNavbarExpanded();
+        }
+    }
+
+    function toggleTimeTravelVisible(oblique) {
+        if (oblique === undefined) oblique = false;
+
+        if (!oblique) {
+            window.panoramaViewer.toggleTimeTravelVisible();
+        } else {
+            window.obliqueViewer.toggleTimeTravelVisible();
+        }
+    }
+
+    function toggleTimeTravelExpanded(oblique) {
+        // set default
+        if (oblique === undefined) oblique = false;
+
+        if (!oblique) {
+            window.panoramaViewer.toggleTimeTravelExpanded();
+        } else {
+            window.obliqueViewer.toggleTimeTravelExpanded();
+        }
+    }
+
+    function addOverlay() {
+        var text = $('#geojson').value;
+        try {
+            var geojson = JSON.parse(text);
+            // var layerSrs = 'EPSG:28992'; // layerSrs is an optional parameter
+            StreetSmartApi.addOverlay('My GeoJSON', geojson/*, layerSrs*/);
+        } catch(error) {
+            console.log('Error parsing GeoJSON: ', error);
+        }
+    }
+
+    function rotateLeft(){
+        window.panoramaViewer.rotateLeft(ROTATE_DEGREES);
+    }
+
+    function rotateRight(){
+        window.panoramaViewer.rotateRight(ROTATE_DEGREES);
+    }
+
+    function rotateUp(){
+        window.panoramaViewer.rotateUp(ROTATE_DEGREES);
+    }
+
+    function rotateDown(){
+        window.panoramaViewer.rotateDown(ROTATE_DEGREES);
+    }
+
+    function zoomIn() {
+        window.panoramaViewer.zoomIn();
+    }
+
+    function zoomOut() {
+        window.panoramaViewer.zoomOut();
+    }
+
+    function resetOrientation() {
+        window.panoramaViewer.setOrientation({
+            yaw: DEFAULT_YAW,
+            pitch: DEFAULT_PITCH,
+            hFov: DEFAULT_HFOV
+        })
+    }
+
+    function consoleLogCurrentRecording() {
+        console.log(window.panoramaViewer.getRecording());
+    }
+
+    function consoleLogFunctionalities() {
+        console.log(StreetSmartApi.getPermissions());
+    }
+
+
+    function setOrientation() {
+        window.panoramaViewer.setOrientation({
+            yaw: parseFloat($('#yaw').value),
+            pitch: parseFloat($('#pitch').value),
+            hFov: parseFloat($('#hFov').value)
+        });
+    }
+
+    function toggleDestroyApiButton() {
+        var btn = $('#destroyApiButton');
+        btn.disabled = !btn.disabled;
+    }
+
+    function hidePasswordAndDisableLoginUI() {
+        var initFieldset = $('#initFieldset');
+        var isEnabled = !initFieldset.disabled;
+        var fieldsets = document.getElementsByTagName('fieldset');
+        for (var i = 0, ii = fieldsets.length; i < ii; ++i) {
+            var el = fieldsets[i];
+            if (el === initFieldset) {
+                el.disabled = isEnabled;
+            }
+            else {
+                el.disabled = !isEnabled;
+            }
+        }
+        $('#password').value = '';
+    }
+
+    function destroyApi() {
+        toggleDestroyApiButton();
+        StreetSmartApi.destroy({
+            targetElement: $('#streetsmartApi'),
+        });
+        hidePasswordAndDisableLoginUI();
+    }
+
+    function initApi() {
+        var username = 'signworks';
+        var password = 'SIGNWORKS';
+        var apikey = "CnkxOTY52fExizg9C_EVanMh2j0RK3gxuzURif89eLsZu3ghqTAt6LEdKng56fo1";
+        var initSrs = $('#srs').value;
+
+        if (!!username && !!password) {
+            StreetSmartApi.init({
+                targetElement: $('#streetsmartApi'),
+                username: username,
+                password: password,
+                apiKey: apikey,
+                srs: initSrs,
+                locale: 'en-us',
+                //configurationUrl: ''
+                addressSettings: {
+                    locale: 'us',
+                    database: 'Nokia'
+                }
+            }).then(
+                function() {
+                    console.log('Api: init: success!');
+                    hidePasswordAndDisableLoginUI();
+                    toggleDestroyApiButton();
+                    setReadyState();
+                    setMeasurementEvents();
+                },
+                function(err) {
+                    console.log('Api: init: failed. Error: ', err);
+                    alert('Api Init Failed!');
+                }
+            );
+        } else {
+            console.log('Api: init: failed. Error: No username or password provided!');
+            alert('Api Init Failed!');
+        }
+    }
+</script>
+</body>
+</html>

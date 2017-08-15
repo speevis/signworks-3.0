@@ -1,0 +1,196 @@
+﻿
+
+#signPane {
+    background-color:  #a5d8c7;  
+    float: left;
+    border: 3px solid #666600;
+    width: 100%;
+    
+}
+
+.signDIV {
+       background-color: #a5d8c7;
+    border: 3px solid #666600;
+    width:100%;
+    height: 100%;
+    overflow: hidden;
+   
+}
+
+
+.timeband {
+    width: 75px;
+}
+
+.timeB{
+
+    background-color:lightgoldenrodyellow;
+}
+.imgDiv {
+    width: 50px;
+    height: 70px;
+ /*   background-color: #a5d8c7; */
+    float: left;
+  padding-left:10px;
+}
+   
+
+
+
+.topDiv {
+
+    position: relative;
+    padding-top:5px;
+  
+   
+    min-height:100px;
+
+}
+
+.bandDiv {
+    font-size: 12px;
+    text-align: left;
+    border-right: dotted 1px red;
+    border-top: dotted 1px #274415;
+    /*   border:dotted 1px red;  */
+    position: relative;
+ padding-left:10px;
+}
+
+
+
+.mutcdDiv {
+   
+ padding-left:70px;
+ 
+}
+
+
+
+
+.sideLabel {
+    position: relative;
+    left: 0px;
+    
+}
+
+.MuttLabel {
+  
+    font-weight: bold;
+    text-align:left;
+  padding-left: 10px;
+   text-decoration: underline;
+   cursor:pointer;
+}
+.MuttLabel2 {
+  
+    font-weight: bold;
+    font-size:10px;
+     padding-left: 10px;
+}
+
+.MuttLabel3 {
+  
+    font-weight: bold;
+    font-size:10px;
+     padding-left: 10px;
+}
+
+.DescLabel {
+    
+    
+}
+.editArrow {
+   float:right;
+    cursor:pointer;
+}
+.lastEdited {
+    font-size: 9px;
+    color: #333333;
+    position: relative;
+    width: 85%;
+    float: left;
+        border-right:dotted 1px  #274415; 
+         border-top:dotted 1px  #274415; 
+    padding-left:10px;   
+}
+.status{
+    position:relative;
+    left:10px;
+
+}
+.remarks{
+      position:relative;
+    left:70px;
+
+}
+.remarksBox{
+    position:relative;
+    left: 70px;
+}
+.mph {
+    position:relative;
+    left:24px;
+  
+}
+
+.editBandDiv{
+    
+     padding-top:10px;
+    position:relative;
+}
+.arrowDir {
+    position:relative;
+    right: 0;
+    float:right;
+    margin-right:4px;
+   
+   
+}
+.dirSign{
+
+    height:60px;
+    width:90px;
+}
+.editField{
+
+    
+}
+
+.fa-plus{
+
+    color:green;
+}
+
+.fa-times{
+
+    color:red;
+}
+.fa-clock-o{
+    padding-left:10px;
+    padding-right:5px;
+}
+.dialog{
+
+    width:1350px;
+   
+}
+
+.timeColumn {
+     padding-left:32px;
+    font-size: 9px;
+    font-weight: bold;
+
+}
+.selLeft{
+    float:left;
+}
+
+.selRight{
+    float:right;
+}
+
+.reOrder{
+
+    float:right;
+}

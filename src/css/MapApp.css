@@ -1,0 +1,98 @@
+﻿       html,
+body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+#map {
+            height: 100%;
+            width: 80%;
+            margin: 0;
+            padding: 0;
+            float:left;
+        }
+
+#rightPane {
+            background-color:#ccc4b7;
+            height: 100%;
+            width: 20%;
+            margin: 0;
+            padding: 0;
+            float:right;
+            font-family:arial;
+           
+        }
+
+#leftPane {
+            background-color:#ccc4b7;
+            height: 100%;
+            width: 20%;
+            margin: 0;
+            padding: 0;
+           z-index: 4;
+            font-family:arial;
+            display:none;
+            position:absolute;
+            top: 30px;
+            left: 0px;
+        }
+
+#header {
+     background-color:#b8bfa6;
+       border: 3px solid #e1e1e1;
+}
+
+.pntError{
+
+ background-color: #a8a961;
+  
+    border: 3px solid #8e8f5f;
+
+}
+.pntError_1{
+
+     font-size: 12px;
+}
+
+.pntError_click{
+    font-size: 9px;
+        font-weight: bold;
+   
+   text-decoration: underline;
+   cursor:pointer;
+
+}
+
+/*typeah3ead widget */
+.dropdownSignCodes .dropdown-menu {
+      max-height: 200px;
+      overflow-y: auto;
+}
+
+
+
+ .k-button .k-image {
+                    height: 116px;
+                }
+
+ .btnSearch {
+
+       position:fixed;
+    z-index: 100;  
+    top: 120px;
+    left: 20px;
+ }
+ #marhelp {
+    float: right;
+    cursor:pointer;
+}
+
+  #toggle {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 100;
+     
+    }
